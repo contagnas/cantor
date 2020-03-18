@@ -5,17 +5,15 @@ import magnolia.{CaseClass, Magnolia, SealedTrait}
 import scala.language.experimental.macros
 
 trait EnumerableDerivation {
-  private def cross(xss: Seq[Seq[Any]]): Seq[Seq[Any]] = {
-    if (xss.isEmpty) Nil
-    else if (xss.size == 1) xss.head.map(List(_))
-    else {
-      val xs = xss.head
-      val rests = xss.tail
-      val restsCrossed = cross(rests)
-      for {
-        x <- xs
-        rest <- restsCrossed
-      } yield x +: rest
+  def cross(xss: Seq[Seq[Any]]): Seq[Seq[Any]] = {
+    val startingIndices = xss.scanLeft(0)((i, xs) => i + xs.size)
+    val width = xss.size
+    val productLength = xss.map(_.size).product
+    0.until(productLength).map { n =>
+      0.until(width).map { i =>
+        val items = xss(i)
+        items((n / math.max(1, startingIndices(i))) % items.size)
+      }
     }
   }
 
